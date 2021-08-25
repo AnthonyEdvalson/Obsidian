@@ -88,12 +88,14 @@ function SET_NODE_NAME(state, {node, name}) {
 function SET_CONTENT(state, action) {
     let newState = {
         ...state,
-        nodes: { ...state.nodes} // TODO In graph reducers, replace state with state.nodes, and provide the full graph state as a third param
+        nodes: { 
+            ...state.nodes,
+            [action.nodeId]: {
+                ...state.nodes[action.nodeId],
+                content: action.content
+            }
+        } // TODO In graph reducers, replace state with state.nodes, and provide the full graph state as a third param
     };
-
-    let node = util.access(newState, "nodes", action.nodeId);
-    node.content = action.content;
-
     return newState;
 }
 
@@ -118,5 +120,32 @@ function DELETE_NODE(state, action) {
     return newState;
 }
 
-export default lookupReducerFactory({ NEW_NODE, SET_NODE_NAME, SET_CONTENT, });
+function RELOAD_CONTENT(state, action) {
+    let source = action.source;
+
+    let newState = {
+        ...state,
+        nodes: util.transform(state.nodes, (node, nodeName) => {
+            console.log(node, source)
+            if (!("content" in node) || !(nodeName in source.nodes))
+                return node;
+            
+            let sourceNode = source.nodes[nodeName];
+            
+            if (!("content" in sourceNode))
+                return node;
+
+            return {
+                ...node,
+                content: sourceNode.content
+            };
+        })
+    }
+
+    return newState;
+}
+
+
+
+export default lookupReducerFactory({ NEW_NODE, SET_NODE_NAME, SET_CONTENT, RELOAD_CONTENT });
 export { hasNameConflict, cleanName, DELETE_NODE }; // TODO move to logic

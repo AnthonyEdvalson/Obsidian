@@ -4,10 +4,9 @@ function Main({input}) {
 	let [msg, setMsg] = useState("...");
 
   useEffect(() => {
-    console.log(1)
     input("World!").then(setMsg);
   }, []);
-
+  
   return <span>{msg}</span>
 }
 

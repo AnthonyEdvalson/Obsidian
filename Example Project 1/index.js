@@ -1,15 +1,10 @@
-const { runServer, cli, oPackFS } = require('obsidian');
-const express = require('express');
-const socketIO = require('socket.io');
+const { cli, oPackFS } = require('obsidian');
 const concurrently = require('concurrently');
 
 async function main() {
     let def = await oPackFS.loadOPackDef("./opack");
     await oPackFS.fragmentDef(def, "F", "./front/src/generated");
     await oPackFS.fragmentDef(def, "B", "./back/src/generated");
-
-    server = runServer(express, socketIO);
-    server.publish();
 
     cli.log("server", "Running backend and frontend...")
     concurrently(

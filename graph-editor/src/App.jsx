@@ -39,7 +39,7 @@ function Editor() {
               <Sidebar setMenu={setMenu} />
               <Panel vertical>
                 <Graphs setMenu={setMenu} />
-                <TimeTravel setMenu={setMenu} />
+                {<TimeTravel setMenu={setMenu} />}
               </Panel>
             </Panel>
           </GraphIdContext.Provider>

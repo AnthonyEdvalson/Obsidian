@@ -18,6 +18,7 @@ function NEW_GRAPH(state, action) {
     }
 }
 
+
 function projectReducer(state, action, fullState) {
     let r = lookupReducerFactory({ NEW_GRAPH })(state, action, fullState);
     r.graphs = indexedReducerFactory(graphReducer, "graphId")(r.graphs, action, fullState);

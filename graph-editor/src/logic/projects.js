@@ -3,7 +3,6 @@ import { toast } from "react-toastify";
 import buildProject from "./compileProject";
 import version from '../logic/version';
 import dedent from 'dedent';
-import { existsSync } from "fs";
 
 const obsidian = window.require("obsidian")
 const oPackFS = obsidian.oPackFS;
@@ -93,10 +92,11 @@ function serializeOPack(oPack) {
 }
 
 async function openProject(projectPath, dispatch) {
+    console.log("Saving project to " + projectPath);
     let data = null;
 
     try {
-        let data = unpackFromSerialization(await oPackFS.loadOPackDef(path.join(projectPath, "opack")), projectPath);
+        let data = await openAndUnpack(projectPath);
         //let oPackPath = path.join(projectPath, "opack/opack.json");
         //let oPack = await fs.readFile(oPackPath, "utf-8");
         //data = await deserializeOPack(oPack, oPackPath);
@@ -112,6 +112,24 @@ async function openProject(projectPath, dispatch) {
     //for (let data of Object.values(packs)) {
     //    dispatch({type: "LOAD_PROJECT", data});
     //}
+}
+
+async function reloadContent(projectPath, graphId, dispatch) {
+    console.log("Reloading project froxm " + projectPath);
+    try {
+        let source = await openAndUnpack(projectPath); // Skip unpacking???
+        let sourceGraph = source.graphs[graphId].present;
+        if (sourceGraph)
+            dispatch({type: "RELOAD_CONTENT", source: sourceGraph, graphId });
+    } catch(e) {
+        toastErr("Unable to reload the project", e);
+        return;
+    }
+}
+
+async function openAndUnpack(projectPath) {
+    let opackPath = path.join(projectPath, "opack"); 
+    return unpackFromSerialization(await oPackFS.loadOPackDef(opackPath), projectPath);
 }
 
 /*
@@ -206,6 +224,7 @@ async function deserializeOPack(oPack, oPackPath, ingoreOutdated) {
 
 async function save(project) {
     let projectPath = project.path;
+    console.log("Saving project to " + projectPath);
 
     if (!fs.existsSync(projectPath))
         await makeDefault(project.name, projectPath);
@@ -389,11 +408,12 @@ const DEFAULT_PROJECT = {
         src: {
             "index.js": dedent`import React, { useMemo } from 'react';
                 import ReactDOM from 'react-dom';
-                import oPack from './generated/opackx';
+                import oPack from './generated/_opackx';
                 
                 
                 let highPrecisionTime = () => performance.timeOrigin + performance.now();
                 oPack.setEditorProfiler(highPrecisionTime, () => {});
+                oPack.connect();
                 
                 function EngineUI() {
                     let res = oPack.evalRoot();
@@ -406,14 +426,15 @@ const DEFAULT_PROJECT = {
                     
                     return React.cloneElement(res, {});
                 }
-                
-                ReactDOM.render(
-                    <React.StrictMode>
-                        <EngineUI />
-                    </React.StrictMode>,
-                    document.getElementById('root')
-                );
-                
+
+                oPack.onReady(() => {
+                    ReactDOM.render(
+                        <React.StrictMode>
+                            <EngineUI />
+                        </React.StrictMode>,
+                        document.getElementById('root')
+                    );
+                });
                 
                 const reportWebVitals = onPerfEntry => {
                     if (onPerfEntry && onPerfEntry instanceof Function) {
@@ -431,7 +452,7 @@ const DEFAULT_PROJECT = {
                 `,
         },
         public: {
-            "index.thml": dedent`<!DOCTYPE html>
+            "index.html": dedent`<!DOCTYPE html>
             <html lang="en">
               <head>
                 <meta charset="utf-8" />
@@ -459,7 +480,9 @@ const DEFAULT_PROJECT = {
                 "devDependencies": {
                     "@babel/core": "^7.12.9",
                     "@babel/node": "^7.12.6",
-                    "@babel/preset-env": "^7.12.7"
+                    "@babel/preset-env": "^7.12.7",
+                    "express": "^4.17.1",
+                    "socket.io": "^3.0.3"
                 }
             }
             `,
@@ -472,26 +495,26 @@ const DEFAULT_PROJECT = {
             }
             `,
         src: {
-            "index.js": dedent`import oPack from './generated/opackx';
+            "index.js": dedent`import { runServer } from 'obsidian';
+                import oPack from './generated/_opackx';
                 import { performance } from 'perf_hooks';
+                import express from 'express';
+                import socketIO from 'socket.io';
                 
                 let highPrecisionTime = () => performance.timeOrigin + performance.now();
                 oPack.setEditorProfiler(highPrecisionTime, () => {});
+
+                runServer(express, socketIO, oPack)
                 `
         }
     },
-    "index.js": dedent`const { runServer, cli, oPackFS } = require('obsidian');
-        const express = require('express');
-        const socketIO = require('socket.io');
+    "index.js": dedent`const { cli, oPackFS } = require('obsidian');
         const concurrently = require('concurrently');
         
         async function main() {
             let def = await oPackFS.loadOPackDef("./opack");
             await oPackFS.fragmentDef(def, "F", "./front/src/generated");
             await oPackFS.fragmentDef(def, "B", "./back/src/generated");
-        
-            server = runServer(express, socketIO);
-            server.publish();
         
             cli.log("server", "Running backend and frontend...")
             concurrently(
@@ -545,12 +568,11 @@ const DEFAULT_PROJECT = {
             "version": "0.0.0",
             "scripts": {
                 "start": "nodemon",
-                "wipe": "kill -9 $(lsof -t -i:5000)"
+                "wipe": "kill -9 $(lsof -t -i:5000)",
+                "setup": "npm install && cd back && npm install && cd ../front && npm install"
             },
             "dependencies": {
-                "concurrently": "^5.3.0",
-                "express": "^4.17.1",
-                "socket.io": "^3.0.3"
+                "concurrently": "^5.3.0"
             }
         }`,
     "nodemon.json": dedent`{
@@ -584,6 +606,7 @@ export default {
     addRecent,
     openProject,
     newProject,
+    reloadContent,
     save,
     importPackage,
     getPackages,

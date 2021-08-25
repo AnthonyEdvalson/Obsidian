@@ -1,0 +1,47 @@
+{
+  "nodes": {
+    "Frontend": {
+      "name": "Frontend",
+      "output": "cb0825a3-bd70-427c-bf74-eaabc0216e69",
+      "content": "import React, {useState, useEffect} from 'react';\n\nfunction Main({input}) {\n\tlet [msg, setMsg] = useState(\"...\");\n\n  useEffect(() => {\n    input(\"World!\").then(setMsg);\n  }, []);\n  \n  return <span>{msg}</span>\n}\n\nexport default { main: Main };\n",
+      "contentPath": "opack/graphs/7bb84c46-8cfe-4f10-902c-86763b1e4bfc/9a898b29-f7fd-4762-a36c-89369190dd6b.js",
+      "type": "code",
+      "sides": [
+        "F"
+      ],
+      "inputs": {
+        "input": "Backend"
+      }
+    },
+    "Output": {
+      "name": "Output",
+      "output": null,
+      "type": "out",
+      "sides": [
+        "F",
+        "B"
+      ],
+      "inputs": {
+        "value": "Frontend"
+      }
+    },
+    "Backend": {
+      "name": "Backend",
+      "output": "54c96a23-e0a3-422f-89af-3d5a44c38d60",
+      "content": "function main({input}, location) {\n\treturn \"Hello, \" + location;\n}\n\nexport default { main };\n",
+      "contentPath": "opack/graphs/7bb84c46-8cfe-4f10-902c-86763b1e4bfc/9d9466e6-3570-4a03-8ee4-cf3dadb7cde3.js",
+      "type": "remote",
+      "sides": [
+        "B"
+      ],
+      "inputs": {}
+    }
+  },
+  "css": ".null {\n\n}",
+  "name": "Main",
+  "description": "",
+  "tags": "",
+  "hideInLibrary": false,
+  "root": "Output",
+  "parameters": null
+}

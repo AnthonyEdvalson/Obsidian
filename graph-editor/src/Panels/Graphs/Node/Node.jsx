@@ -16,7 +16,7 @@ import Ports from './Ports';
 function Node(props) {
 	const key = props.k;
 	const data = useNodeSelector(key);
-	let { x, y, name, type, inputs, output, content, schema } = data;
+	let { x, y, name, type, inputs, output, content, contentPath, schema } = data;
 
 	let { selected, setSelect, dragging, error } = useSelectable("node", key);
 
@@ -28,7 +28,8 @@ function Node(props) {
 			case "back":
 			case "agno":
 			case "data":
-				props.setEditingNodeId(key);
+				//props.setEditingNodeId(key);
+				window.location = `vscode://file/${encodeURI(contentPath)}`
 				break;
 			case "graph":
 				let { graphId, projectId } = data.location

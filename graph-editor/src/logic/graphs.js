@@ -79,6 +79,7 @@ function unpackFromSerialization(data, graphId) {
     // attributes that are not serialized, like selection and newLink information.
     let template = makeEmptyGraph(null, graphId);
     let fullGraph = util.merge(template, data);
+
     return newHistory([], fullGraph, []);
 }
 

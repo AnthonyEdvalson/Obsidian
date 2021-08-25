@@ -1,30 +1,32 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import oPack from './generated/opackx';
+import oPack from './generated/_opackx';
 
 
 let highPrecisionTime = () => performance.timeOrigin + performance.now();
 oPack.setEditorProfiler(highPrecisionTime, () => {});
+oPack.connect();
 
 function EngineUI() {
-    let res = oPack.evalRoot();
-
-    if (res === undefined)
+    let root = oPack.evalRoot();
+    
+    if (root === undefined)
         throw new Error("The ouptut of the graph 'Main' is undefined")
 
-    if (!React.isValidElement(res))
-        return <p>{JSON.stringify(res, null, 2)}</p>
+    if (!React.isValidElement(root))
+        return <p>{JSON.stringify(root, null, 2)}</p>
     
-    return React.cloneElement(res, {});
+    return React.cloneElement(root, {});
 }
 
-ReactDOM.render(
-    <React.StrictMode>
-        <EngineUI />
-    </React.StrictMode>,
-    document.getElementById('root')
-);
-
+oPack.onReady(() => {
+    ReactDOM.render(
+        <React.StrictMode>
+            <EngineUI />
+        </React.StrictMode>,
+        document.getElementById('root')
+    );
+});
 
 const reportWebVitals = onPerfEntry => {
     if (onPerfEntry && onPerfEntry instanceof Function) {

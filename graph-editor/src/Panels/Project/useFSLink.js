@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
-import { useProjectDispatch, useProjectSelector } from '../../logic/scope';
-const fs = window.require('fs');
-const Path = window.require('path');
+import projects from '../../logic/projects';
+import { useGraphSelector, useProjectDispatch, useProjectSelector } from '../../logic/scope';
+//const fs = window.require('fs');
+//const Path = window.require('path');
 const { app } = window.require('electron').remote;
 
 
@@ -15,8 +16,9 @@ function useFSLink() {
 
         let onFocus = () => {
             console.log("Welcome back!");
-
-            for (let [graphId, graph] of Object.entries(project.graphs)) {
+            for (let graphId of Object.keys(project.graphs))
+                projects.reloadContent(project.path, graphId, dispatch);
+            /*for (let [graphId, graph] of Object.entries(project.graphs)) {
                 graph = graph.present;
                 let graphDir = "./project/" + graph.meta.name + "/";
 
@@ -33,11 +35,13 @@ function useFSLink() {
                 let css = pullFile("_css.css");
                 if (graph.css !== css)
                     dispatch({ type: "SET_GRAPH_CSS", css, graphId });
-            }
+            }*/
         };
         
         let onBlur = () => {
-            deleteFolderRecursive("./project");
+            console.log(project)
+            //projects.save(project);
+            /*deleteFolderRecursive("./project");
             fs.mkdirSync("./project");
 
             for (let graph of Object.values(project.graphs)) {
@@ -55,7 +59,7 @@ function useFSLink() {
                 }
 
                 pushFile("_css.css", graph.css);
-            }
+            }*/
         };
 
         app.on('browser-window-focus', onFocus);
@@ -67,7 +71,7 @@ function useFSLink() {
         }
     }, [project, dispatch]);
 }
-
+/*
 function deleteFolderRecursive(path) {
     if (fs.existsSync(path)) {
       fs.readdirSync(path).forEach((file, index) => {
@@ -80,6 +84,6 @@ function deleteFolderRecursive(path) {
       });
       fs.rmdirSync(path);
     }
-  };
+  };*/
 
 export default useFSLink;

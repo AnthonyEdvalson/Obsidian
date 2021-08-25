@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import UI from '../../../../../UI';
-import engine from '../../../../../logic/engine';
+//import engine from '../../../../../logic/engine';
 
 
 function Node(props) {
@@ -11,7 +11,7 @@ function Node(props) {
         </UI.Foldout>
     );
 }
-
+/*
 function NodeTest(props) {
     let courier = engine.useCourier();
 
@@ -72,6 +72,6 @@ function NodeTest(props) {
             }
         </div>
     )
-}
+}*/
 
 export default Node;

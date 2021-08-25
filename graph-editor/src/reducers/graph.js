@@ -27,7 +27,6 @@ function DUPLICATE(state, action, fullState) {
 }
 
 
-
 let graphReducer = lookupReducerFactory({ SET_GRAPH_CSS, PASTE, DUPLICATE });
 
 // TODO bookmark undo, add a bookmark button, then you can jump back or forward to bookmarks in the undo stack

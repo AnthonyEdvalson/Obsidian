@@ -37,7 +37,7 @@
     "wait-on": "^4.0.0"
   },
   "devDependencies": {
-    "electron": "^11.1.0",
+    "electron": "^18.3.7",
     "react-app-rewired": "^2.1.6",
     "react-scripts": "^3.4.3"
   },
